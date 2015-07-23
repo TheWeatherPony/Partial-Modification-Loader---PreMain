@@ -37,6 +37,7 @@ public class PMLLoadFocuser{
 		distributeLoadUpdate(new ILoadStateListener.ThreadChangeContextClassLoaderUpdate(loader, thread));
 	}
 	static void init(){
+		ILoadStateListener.class.getDeclaredClasses();
 		LoadNote.init();
 		addLoadNote(PMLLoadFocuser.class.getClassLoader(),"weatherpony.pml.");
 	}
@@ -222,9 +223,10 @@ public class PMLLoadFocuser{
 	}
 	
 	public static byte[] pmlClassTransformation(ClassLoader loader, String name, byte[] data, int off, int len, ProtectionDomain protectionDomain)throws Throwable{
+		//System.err.println("PMLLoadFocuser: pmlClassTransformation");
 		try{
 			data = Arrays.copyOfRange(data, off, off+len);
-			PMLRoot.transformClass(loader, name, data, protectionDomain);
+			data = PMLRoot.transformClass(loader, name, data, protectionDomain);
 			return data;
 		}catch(Throwable e){
 			e.printStackTrace();

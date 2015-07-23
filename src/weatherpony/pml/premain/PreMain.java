@@ -17,16 +17,23 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.apache.commons.io.output.TeeOutputStream;
-
 import weatherpony.pml.launch.PMLLoadFocuser;
 import weatherpony.pml.launch.PMLRoot;
 import weatherpony.util.classloading.ParentLastClassLoader;
+import weatherpony.util.streams.TeeOutputStream;
 
 public class PreMain{
-	
-	@SuppressWarnings("resource")
+	public static void main(String[] args){
+		String agentArgs = System.getProperty("pml.dev.agentArgs");
+		start(agentArgs);
+		
+		String proxiedMain = System.getProperty("pml.proxyMain");
+		new ReplacementMainThread(proxiedMain, args).start();
+	}
 	public static void premain(String agentargs, Instrumentation i){
+		start(agentargs);
+	}
+	static void start(String agentargs){
 		if(agentargs == null)
 			agentargs = "";
 		PMLLoadFocuser.agentargs = agentargs;

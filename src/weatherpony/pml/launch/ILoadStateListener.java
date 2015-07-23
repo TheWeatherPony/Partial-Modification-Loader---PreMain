@@ -31,10 +31,6 @@ public interface ILoadStateListener{
 			return this.getClass().getName()+"{"+loader.toString()+','+finishedConstructor+constructorDescription+"}";
 		}
 	}
-	/**
-	 * This is deprecated because the generation of the update event is unreliable in certain cases.  
-	 */
-	@Deprecated
 	public static class ThreadChangeContextClassLoaderUpdate extends ClassLoaderUpdate{
 		public final Thread thread;
 		public ThreadChangeContextClassLoaderUpdate(ClassLoader loader, Thread thread){
