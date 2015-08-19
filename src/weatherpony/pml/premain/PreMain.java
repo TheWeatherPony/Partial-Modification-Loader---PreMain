@@ -1,8 +1,11 @@
 package weatherpony.pml.premain;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.instrument.Instrumentation;
@@ -10,12 +13,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Collections;
 
 import weatherpony.pml.launch.PMLLoadFocuser;
 import weatherpony.pml.launch.PMLRoot;
@@ -124,25 +123,42 @@ public class PreMain{
 	static Method addURL;
 	static void handleSelfSetup() throws Exception {
 		_setupAddURL();
+		_setupLoadPMLDependencies();
 	}
 	private static void _setupAddURL() throws Exception {
 		addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 		addURL.setAccessible(true);
 	}
 	static void addURL(URLClassLoader loader, URL url) throws Exception {
-		if(addURL == null)
-			_setupAddURL();
 		addURL.invoke(loader, url);
 	}
+	private static void _setupLoadPMLDependencies(){ 
+		File depfile = new File("PML","pml.earlyDependencies.ini");
+		if(depfile.exists() && depfile.isFile()){
+			URLClassLoader loader = (URLClassLoader) PreMain.class.getClassLoader();
+			try{
+				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(depfile)));
+				String line = reader.readLine();
+				while(line != null && !line.isEmpty()){
+					addURL(loader, new File(line).toURI().toURL());
+					line = reader.readLine();
+				}
+				reader.close();
+			}catch(Exception e){
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+		}
+	}
 	static void handleAgent() throws Exception {
+		ClassLoader currentLoader =Thread.currentThread().getContextClassLoader();
 		if(System.getProperty("pml.dev") == null){
 			URL myLocation = PreMain.class.getProtectionDomain().getCodeSource().getLocation();
 			Path myloc = Paths.get(myLocation.toURI());
 			Path preagent = myloc.resolveSibling("PMLPreAgent.jar");
-			addURL((URLClassLoader) Thread.currentThread().getContextClassLoader(), preagent.toUri().toURL());//throws Exception
+			addURL((URLClassLoader) currentLoader, preagent.toUri().toURL());//throws Exception
 		}
 		//after setting up, run the PreAgent, which will extract and install the natives and OS specific code, as well as start the Agent itself
-		Class.forName("weatherpony.pmlpreinstrumentation.AgentStart").newInstance();
-		
+		currentLoader.loadClass("weatherpony.pmlpreinstrumentation.AgentStart").newInstance();
 	}
 }

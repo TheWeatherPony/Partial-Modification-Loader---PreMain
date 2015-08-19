@@ -20,6 +20,7 @@ public class PMLLoadFocuser{
 	public static final String pmlClassLoaderContextClassLoaderChangeMethodName = "changeInContextClassLoader";
 	
 	public static final String pmlMainClassTransformerSystemProperty = "PML_mainSwap";
+	public static final String pmlMainClassNameSystemProperty = "pml.mainClassName";
 	
 	public static String agentargs;
 	

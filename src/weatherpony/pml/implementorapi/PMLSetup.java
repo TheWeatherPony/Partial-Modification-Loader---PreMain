@@ -75,4 +75,6 @@ public abstract class PMLSetup<self extends PMLSetup<self,EnvType>, EnvType exte
 			this.lib = lib;
 		}
 	}
+	public void notifyOfEndCoreLoad(){
+	}
 }

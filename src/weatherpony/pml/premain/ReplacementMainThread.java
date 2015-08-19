@@ -31,7 +31,8 @@ public class ReplacementMainThread extends Thread{
 	@Override
 	public void run(){
 		System.setProperty(PMLLoadFocuser.pmlMainClassTransformerSystemProperty, "t");
-		Method proxyMain;
+		System.setProperty(PMLLoadFocuser.pmlMainClassNameSystemProperty, main);
+		
 		System.out.println("PML: replacementMainThread replacing ClassLoader");
 		this.setContextClassLoader(this.replacementloader);
 		System.out.println("PML: replacementMainThread replaced ClassLoader");
@@ -65,7 +66,7 @@ public class ReplacementMainThread extends Thread{
 		
 		PMLRoot.preload(args);
 		loader = this.getContextClassLoader();
-		
+		Method proxyMain;
 		try{
 			proxyMain = loader.loadClass(this.main).getMethod("main", String[].class);
 		}catch(Throwable e){

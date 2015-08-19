@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import weatherpony.pml.implementorapi.PMLSetup;
+
 public final class PMLRoot{
 	public static final String selfLoadPrefix;
 	static{
@@ -73,7 +75,7 @@ public final class PMLRoot{
 			}
 			
 		try{
-			first = (Callable) Class.forName("weatherpony.pml_loader.PMLLoader", true,Thread.currentThread().getContextClassLoader()).newInstance();
+			first = (Callable) Thread.currentThread().getContextClassLoader().loadClass("weatherpony.pml_loader.PMLLoader").newInstance();
 		}catch(ClassNotFoundException e){
 			installError = new ReportedError(InstallErrors.PMLLoaderNotFound, e);
 			return;
@@ -108,6 +110,7 @@ public final class PMLRoot{
 		}catch(Throwable e){
 			installError = new ReportedError(InstallErrors.PMLCoreError, e);
 		}
+		PMLSetup.getSetup().notifyOfEndCoreLoad();
 	}
 	public static Throwable addURL(URLClassLoader loader, URL url){
 		if(addURL == null){
@@ -237,6 +240,8 @@ public final class PMLRoot{
 		return du;
 	}
 	public static byte[] transformClass(ClassLoader loader, String name, byte[] data, ProtectionDomain protectionDomain)throws Throwable{
+		if(name == null)
+			return data;
 		try{
 			if(secondTransform(name))
 				for(IClassManipulator each : secondManipulatorList){

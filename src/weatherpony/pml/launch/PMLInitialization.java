@@ -40,7 +40,7 @@ public class PMLInitialization {
 			try{
 				reader = new BufferedReader(new InputStreamReader(new FileInputStream(PMLINI)));
 			}catch(Throwable e){
-				
+				e.printStackTrace();
 			}
 		}
 		
@@ -49,8 +49,8 @@ public class PMLInitialization {
 		try{
 			if(reader != null)
 				iniAPIJar = reader.readLine();
-		}catch(IOException e1){
-			
+		}catch(IOException e){
+			e.printStackTrace();
 		}
 		if(PMLApplicationMainAPIJar == null){
 			PMLApplicationMainAPIJar = iniAPIJar;
@@ -62,7 +62,11 @@ public class PMLInitialization {
 			}
 			if(jar.exists()){
 				try{
-					PMLRoot.addURL((URLClassLoader)Thread.currentThread().getContextClassLoader(), jar.toURI().toURL());
+					Throwable e = PMLRoot.addURL((URLClassLoader)Thread.currentThread().getContextClassLoader(), jar.toURI().toURL());
+					if(e != null){
+						e.printStackTrace();
+						throw new RuntimeException(e);
+					}
 				}catch(MalformedURLException e){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -89,7 +93,7 @@ public class PMLInitialization {
 			new RuntimeException("PML Application API Main class not found");
 		}
 		try{
-			Class temp = Class.forName(PMLApplicationMainAPIClass, false, Thread.currentThread().getContextClassLoader());
+			Class temp = Thread.currentThread().getContextClassLoader().loadClass(PMLApplicationMainAPIClass);
 			PMLSetup setup = (PMLSetup) temp.newInstance();
 		}catch(Throwable e){
 			throw new RuntimeException(e);
